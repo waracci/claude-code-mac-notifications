@@ -44,6 +44,19 @@ The plugin adds the `Stop` hook for every session on your Mac. It does not chang
 
 Use the plugin **or** the script installer below. Do not use both, or you get two banners for each finish.
 
+## Install as a skill
+
+The folder `skills/claude-code-mac-notifications/` is a standard `SKILL.md` skill. It has the hook, the installer and the uninstaller. Your agent installs the notifications for you, and it can also test, change or remove them.
+
+1. Copy the folder to `~/.claude/skills/`:
+   ```bash
+   git clone https://github.com/waracci/claude-code-mac-notifications.git
+   cp -R claude-code-mac-notifications/skills/claude-code-mac-notifications ~/.claude/skills/
+   ```
+2. In Claude Code, ask: *"Set up Mac notifications for when Claude Code finishes."*
+
+The skill is also on the [Agensi](https://agensi.io) marketplace. The plugin above includes the skill too.
+
 ## Install with the script
 
 ```bash
@@ -161,6 +174,8 @@ Set these environment variables in your shell profile, or in the `env` object of
 .claude-plugin/         the plugin manifest, the marketplace file and the icon
 hooks/hooks.json        the Stop hook for the plugin
 hooks/notify-stop.sh    the Stop hook script
+skills/                 the same hook as a SKILL.md skill
+scripts/build-skill.sh  syncs the skill folder and builds the skill ZIP
 install.sh              installs the script and adds the hook to your settings
 uninstall.sh            removes them again
 docs/how-it-works.svg   the diagram above

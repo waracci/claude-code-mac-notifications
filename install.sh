@@ -31,4 +31,4 @@ else
 fi
 
 echo '{"last_assistant_message":"The notification hook is installed."}' | bash "$hook"
-echo "You should see a test notification now. If not, see 'No notification shows' in the README."
+echo "You should see a test notification now. If not, see "If no banner shows" in SKILL.md or the README."

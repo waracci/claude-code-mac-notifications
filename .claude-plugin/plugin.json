@@ -1,6 +1,6 @@
 {
   "name": "mac-notifications",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "macOS notification when a Claude Code session finishes: the project name and the first words of what Claude did. Optional Ack button with alerter.",
   "author": {
     "name": "waracci",
