@@ -4,8 +4,10 @@
 # Claude's last message, so you can see what the session did.
 #
 # Settings (optional, environment variables):
-#   CLAUDE_NOTIFY_SOUND   notification sound name (default: Glass). Set it empty for no sound.
-#   CLAUDE_NOTIFY_WORDS   how many words of the last message to show (default: 12).
+#   CLAUDE_NOTIFY_SOUND    notification sound name (default: Glass). Set it empty for no sound.
+#   CLAUDE_NOTIFY_WORDS    how many words of the last message to show (default: 12).
+#   CLAUDE_NOTIFY_ACK      label of the close button when alerter is used (default: Ack).
+#   CLAUDE_NOTIFY_ALERTER  path to alerter, if it is not in ~/.claude/bin or on PATH.
 
 in=$(cat)
 command -v jq >/dev/null 2>&1 || { osascript -e 'display notification "Finished" with title "Claude Code"'; exit 0; }
@@ -31,7 +33,25 @@ desc=$(printf '%s\n' "$msg" | sed -E 's/\[([^]]*)\]\([^)]*\)/\1/g; s/[*`#>_|]//g
 
 sound=${CLAUDE_NOTIFY_SOUND-Glass}
 
-# Pass the text as arguments, not inside the script, so quotes in a message cannot break it.
+# Preferred: alerter (https://github.com/vjeantet/alerter). It gives an "Ack"
+# button that only closes the banner. One banner per session: a new finish in
+# the same session replaces the old banner instead of adding another one.
+alerter=""
+for c in "${CLAUDE_NOTIFY_ALERTER:-}" "$HOME/.claude/bin/alerter" "$(command -v alerter 2>/dev/null)"; do
+  if [ -n "$c" ] && [ -x "$c" ]; then alerter=$c; break; fi
+done
+if [ -n "$alerter" ]; then
+  sid=$(jq -r '.session_id // empty' <<<"$in" 2>/dev/null)
+  args=(--title "Claude Code" --subtitle "$name" --message "$desc" --close-label "${CLAUDE_NOTIFY_ACK:-Ack}" --group "claude-${sid:-$name}")
+  [ -n "$sound" ] && args+=(--sound "$sound")
+  # alerter waits until you click, so run it detached; the hook returns at once.
+  nohup "$alerter" "${args[@]}" >/dev/null 2>&1 </dev/null &
+  disown 2>/dev/null
+  exit 0
+fi
+
+# Fallback: osascript. The text goes in as arguments, not inside the script,
+# so quotes in a message cannot break it.
 osascript - "$desc" "$name" "$sound" <<'APPLESCRIPT' >/dev/null 2>&1
 on run argv
   set theText to item 1 of argv

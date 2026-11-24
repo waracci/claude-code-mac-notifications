@@ -25,7 +25,26 @@ Get a macOS notification each time a [Claude Code](https://docs.claude.com/en/do
 - Claude Code
 - [`jq`](https://jqlang.github.io/jq/): `brew install jq`
 
-## Install
+## Install as a plugin (recommended)
+
+In Claude Code, run:
+
+```
+/plugin install mac-notifications --marketplace waracci/claude-code-mac-notifications
+```
+
+On Claude Code versions before 2.1.275, add the marketplace first:
+
+```
+/plugin marketplace add waracci/claude-code-mac-notifications
+/plugin install mac-notifications@waracci
+```
+
+The plugin adds the `Stop` hook for every session on your Mac. It does not change your `settings.json`. To turn it off, use `/plugin` and disable or uninstall `mac-notifications`.
+
+Use the plugin **or** the script installer below. Do not use both, or you get two banners for each finish.
+
+## Install with the script
 
 ```bash
 git clone https://github.com/waracci/claude-code-mac-notifications.git
@@ -74,12 +93,24 @@ Then add this to `~/.claude/settings.json`. If you already have a `hooks` object
 }
 ```
 
+## Ack button and one banner per session (optional)
+
+The default banner comes from `osascript`. macOS shows it as a **Script Editor** notification. Its only button is **Show**, and **Show** opens Script Editor.
+
+For a better banner, install [alerter](https://github.com/vjeantet/alerter). Put the binary in `~/.claude/bin/alerter` or anywhere on your `PATH`. The script finds it and then:
+
+- shows an **Ack** button that only closes the banner,
+- keeps one banner for each session: a new finish replaces the old banner of the same session,
+- does not wait for your click: the hook still ends at once.
+
+To make the banners stay until you click **Ack**, go to **System Settings → Notifications → alerter**. Set the banner style to **Persistent**. To see each banner on its own, and not in one stack, set **Notification grouping** to **Off**.
+
 ## How it works
 
 1. When a session finishes its turn, Claude Code runs every `Stop` hook. It sends the hook a JSON object on stdin. The object includes `cwd` (the project folder), `transcript_path`, and, in newer versions, `last_assistant_message`.
 2. `notify-stop.sh` reads the folder name. It reads the last message from `last_assistant_message`. If that field is missing, it reads the last message from the end of the transcript file.
 3. The script keeps the first line that has text, removes the markdown symbols, and keeps about 12 words.
-4. `osascript` shows the notification. The script gives the text to AppleScript as arguments and not inside the script code. Thus quotes or `$(...)` in a message cannot break the command or run code.
+4. If `alerter` is installed, it shows the notification with an **Ack** button. The script starts it in the background, so the hook does not wait. If `alerter` is not installed, `osascript` shows the notification. The script gives the text to AppleScript as arguments and not inside the script code. Thus quotes or `$(...)` in a message cannot break the command or run code.
 5. The hook always ends with exit code 0, so it can never block or change your session.
 
 A subagent that finishes does not send a notification. Only the main session does.
@@ -92,6 +123,8 @@ Set these environment variables in your shell profile, or in the `env` object of
 |---|---|---|
 | `CLAUDE_NOTIFY_SOUND` | `Glass` | The sound name. Other names are in `/System/Library/Sounds`, for example `Ping` or `Submarine`. Set it to an empty value for no sound. |
 | `CLAUDE_NOTIFY_WORDS` | `12` | How many words of the last message to show. |
+| `CLAUDE_NOTIFY_ACK` | `Ack` | The button text when `alerter` is installed. |
+| `CLAUDE_NOTIFY_ALERTER` | (none) | The full path to `alerter`, if it is not in `~/.claude/bin` or on your `PATH`. |
 
 ## Privacy
 
@@ -115,7 +148,7 @@ Set these environment variables in your shell profile, or in the `env` object of
 ## Too noisy?
 
 - To remove only the sound, set `CLAUDE_NOTIFY_SOUND=""`.
-- To turn the hook off for some time, use `/hooks` in Claude Code.
+- To turn the hook off for some time, use `/hooks` in Claude Code. If you use the plugin, disable it with `/plugin`.
 - To remove it completely, run:
   ```bash
   ./uninstall.sh
@@ -125,6 +158,8 @@ Set these environment variables in your shell profile, or in the `env` object of
 ## Files
 
 ```
+.claude-plugin/         the plugin manifest, the marketplace file and the icon
+hooks/hooks.json        the Stop hook for the plugin
 hooks/notify-stop.sh    the Stop hook script
 install.sh              installs the script and adds the hook to your settings
 uninstall.sh            removes them again

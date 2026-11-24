@@ -1,0 +1,22 @@
+{
+  "name": "waracci",
+  "description": "Claude Code plugins by waracci.",
+  "owner": {
+    "name": "waracci",
+    "url": "https://github.com/waracci"
+  },
+  "plugins": [
+    {
+      "name": "mac-notifications",
+      "source": "./",
+      "description": "macOS notification when a Claude Code session finishes, with the project name and what Claude did.",
+      "version": "1.1.0",
+      "license": "MIT",
+      "keywords": [
+        "macos",
+        "notifications",
+        "hooks"
+      ]
+    }
+  ]
+}

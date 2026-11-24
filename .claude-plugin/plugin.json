@@ -1,0 +1,22 @@
+{
+  "name": "mac-notifications",
+  "version": "1.1.0",
+  "description": "macOS notification when a Claude Code session finishes: the project name and the first words of what Claude did. Optional Ack button with alerter.",
+  "author": {
+    "name": "waracci",
+    "url": "https://github.com/waracci"
+  },
+  "homepage": "https://github.com/waracci/claude-code-mac-notifications",
+  "repository": "https://github.com/waracci/claude-code-mac-notifications",
+  "license": "MIT",
+  "keywords": [
+    "macos",
+    "notifications",
+    "hooks",
+    "stop-hook"
+  ],
+  "icon": ".claude-plugin/icon.png",
+  "network": {
+    "hosts": []
+  }
+}
